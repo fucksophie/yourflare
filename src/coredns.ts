@@ -5,6 +5,7 @@ import { tgz } from "https://deno.land/x/compress@v0.4.4/mod.ts";
 import zonefile from 'https://deno.land/x/zonefile@0.3.0/lib/zonefile.js';
 import { exists } from "./lib.ts";
 import { settings } from "../config/settings.ts";
+import { DNSRecord } from "./domains.ts";
 
 if(!await exists("coredns/")) {
   console.log("[DNS] Most likely first boot!")
@@ -53,7 +54,7 @@ class CorednsManager {
       if(settings.debug) {
         console.log("[DNS-RAW] " + line);
       }
-      
+
       if(line.startsWith("CoreDNS")) {
         console.log("[DNS] Started CoreDNS!");
       }
@@ -77,7 +78,23 @@ class CorednsManager {
     this.reader(this.process.stderr!)
   }
 
-  generateZonefile(domain: Domain) {    
+  generateZonefile(domain: Domain) {  
+    const root1 = settings.nameservers[0].name.split(".").slice(-2).join('.')
+    const root2 = settings.nameservers[1].name.split(".").slice(-2).join('.')
+    
+    const subdomain1 = settings.nameservers[0].name.split(".").slice(0, -2).join('.')
+    const subdomain2 = settings.nameservers[0].name.split(".").slice(0, -2).join('.')
+
+    if(root1 == domain.zone && root2 == domain.zone) {
+      const record1 = new DNSRecord("a");
+      const record2 = new DNSRecord("a");
+      record1.setFields([subdomain1, settings.nameservers[0].ip]);
+      record2.setFields([subdomain2, settings.nameservers[1].ip]);
+      
+      domain.records.a.push(record1);
+      domain.records.a.push(record2);
+    }
+
     Deno.writeTextFileSync("coredns/zones/db."+domain.zone, zonefile.generate({
       "$origin": domain.zone+".",
       "$ttl": domain.ttl,
