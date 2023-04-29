@@ -1,0 +1,5 @@
+coredns/
+static/tlds.json
+config/passwordHash.ts
+config/settings.ts
+yourflare.db

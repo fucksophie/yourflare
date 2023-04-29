@@ -1,0 +1,75 @@
+import {z} from 'zod'
+import { validationError } from './validation.ts';
+
+const asciiOnly = /^[a-zA-Z.0-9_]+$/;
+// const simpleDomainRegex = /^[a-zA-Z0-9_][a-zA-Z0-9-_]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/gm
+const domainWithSubdomainRegex = /^[[a-zA-Z0-9_.]{1,61}\.(.+)$/gm
+
+const Name = z.string().max(255).min(1).regex(asciiOnly);
+const Host = z.string().regex(domainWithSubdomainRegex);
+const Target = Host;
+const Ipv4 = z.string().ip({version: "v4"});
+const Ipv6 = z.string().ip({version: "v6"});
+const Txt = z.string().max(255).regex(asciiOnly);
+const Preference = z.coerce.number().max(65535).min(1);
+const Weight = Preference;
+const Priority = Preference;
+const Port = Preference;
+
+export const namedTypes: Record<string, Record<string, z.ZodNumber|z.ZodString>> = {
+  a: {Name, Ipv4},
+  aaaa: {Name, Ipv6},
+  cname: {Name, Host},
+  ns: {Host},
+  txt: {Name, Txt},
+  mx: {Preference, Host},
+  srv: {Name, Target, Priority, Weight, Port}
+}
+
+export const supportedRecords = Object.keys(namedTypes);
+const recordRegex = new RegExp("^("+supportedRecords.join("|")+")$")
+export type allowedRecords = typeof supportedRecords[number];
+
+export const TTL = z.number().max(86400).min(1);
+export const RecordType = z.string().regex(recordRegex, "Is not a part of the supported records: " + supportedRecords.join(", "));
+export const DomainID = z.string().uuid();
+export const Zone = z.string().max(63+4).min(4);
+
+export const recordDefinitions: Record<string, string[]> = {};
+
+Object.entries(namedTypes).map(z => {
+  recordDefinitions[z[0]] = Object.keys(z[1]);
+})
+
+export class DNSRecord {
+  type: allowedRecords;
+  fields: string[] = [];
+  
+  constructor(type: allowedRecords) {
+    this.type = type;
+  }
+  
+  setFields(fields: string[]) {
+    this.fields = fields;
+  }
+
+  validation(): Response {
+    let response = new Response();
+    
+    let i = 0;
+    for(const v of Object.entries(this.getFieldTypes())) {
+      const validate = v[1].safeParse(this.fields[i]);
+      if(!validate.success) {
+        response = validationError(validate.error, v[0]);
+        break;
+      }
+      i++;
+    }
+
+    return response
+  }
+
+  getFieldTypes(): Record<string, (z.ZodString|z.ZodNumber)> {
+    return namedTypes[this.type];
+  }
+}

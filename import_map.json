@@ -1,0 +1,19 @@
+{
+  "imports": {
+    "$fresh/": "https://raw.githubusercontent.com/denoland/fresh/673c161aee765f702fc33e005d4836236a5ee85d/",
+    "preact": "https://esm.sh/preact@10.11.0",
+    "preact/": "https://esm.sh/preact@10.11.0/",
+    "preact-render-to-string": "https://esm.sh/*preact-render-to-string@5.2.4",
+    "@preact/signals": "https://esm.sh/*@preact/signals@1.0.3",
+    "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.0.1",
+    "twind": "https://esm.sh/@twind/core@1.1.3",
+    "twind/": "https://esm.sh/@twind/core@1.1.3/",
+    "twind-preset-autoprefix": "https://esm.sh/@twind/preset-autoprefix@1.0.7",
+    "twind-preset-tailwind": "https://esm.sh/@twind/preset-tailwind@1.1.4",
+    "twind_fresh_plugin/": "https://deno.land/x/fresh_twindv1_plugin@v1.3.0/",
+    "zod": "https://deno.land/x/zod@v3.21.4/mod.ts",
+    "argon": "https://deno.land/x/argontwo@0.1.1/mod.ts",
+    "sqlite": "https://deno.land/x/sqlite@v3.7.0/mod.ts",
+    "cookies": "https://deno.land/std@0.184.0/http/cookie.ts"
+  }
+}
