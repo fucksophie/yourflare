@@ -25,4 +25,4 @@
 ### Why?
 My domain provider doesn't allow me to use more than 10 A records, and using a wildcard is kind of a pain since I don't know what I'm hosting.
 
-Cloudflare is also a monopolitic company that basically controls the whole internet, and since I don't want my own domains to be apart of it's systems, I wrote my own DNS mangment software.
+Cloudflare is also a monolithic company that basically controls the whole internet, and since I don't want my own domains to be apart of it's systems, I wrote my own DNS mangment software.
