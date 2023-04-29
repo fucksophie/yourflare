@@ -50,6 +50,10 @@ class CorednsManager {
     reader: Deno.Reader,
   ) {
     for await (const line of readLines(reader)) {
+      if(settings.debug) {
+        console.log("[DNS-RAW] " + line);
+      }
+      
       if(line.startsWith("CoreDNS")) {
         console.log("[DNS] Started CoreDNS!");
       }
