@@ -84,6 +84,8 @@ class CorednsManager {
     
     const subdomain1 = settings.nameservers[0].name.split(".").slice(0, -2).join('.')
     const subdomain2 = settings.nameservers[1].name.split(".").slice(0, -2).join('.')
+    
+    let aRecords = domain.records.a;
 
     if(root1 == domain.zone && root2 == domain.zone) {
       const record1 = new DNSRecord("a");
@@ -91,10 +93,10 @@ class CorednsManager {
       record1.setFields([subdomain1, settings.nameservers[0].ip]);
       record2.setFields([subdomain2, settings.nameservers[1].ip]);
 
-      if(!domain.records.a) domain.records.a = [];
+      if(!aRecords) aRecords = [];
 
-      domain.records.a.push(record1);
-      domain.records.a.push(record2);
+      aRecords.push(record1);
+      aRecords.push(record2);
     }
 
     Deno.writeTextFileSync("coredns/zones/db."+domain.zone, zonefile.generate({
@@ -117,7 +119,7 @@ class CorednsManager {
       txt: domain.records.txt?.map(z => { return { name: z.fields[0], txt: z.fields[1] } }),
       cname: domain.records.cname?.map(z => { return { name: z.fields[0], alias: z.fields[1] } }),
       aaaa: domain.records.aaaa?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
-      a: domain.records.a?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
+      a: aRecords?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
       mx: domain.records.mx?.map(z => { return { preference: +z.fields[0], host: z.fields[1] } }),
       srv: domain.records.srv?.map(z => { return { name: z.fields[0], target: z.fields[1], priority: +z.fields[2], weight: +z.fields[3], port: +z.fields[4] } })
     }));
