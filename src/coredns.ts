@@ -90,6 +90,8 @@ class CorednsManager {
       const record2 = new DNSRecord("a");
       record1.setFields([subdomain1, settings.nameservers[0].ip]);
       record2.setFields([subdomain2, settings.nameservers[1].ip]);
+
+      if(!domain.records.a) domain.records.a = [];
       
       domain.records.a.push(record1);
       domain.records.a.push(record2);
