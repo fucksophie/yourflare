@@ -101,11 +101,13 @@ class CorednsManager {
     
     aRecords = aRecords.map(z => {
       z.fields = z.fields.map(y => {
-        if(y == domain.zone) return "";
+        if(y == domain.zone) return "@";
         return y;
       })
       return z;
     })
+    
+    aRecords = aRecords.sort(z => z.fields[0]?.startsWith("@")?1:0)
 
     Deno.writeTextFileSync("coredns/zones/db."+domain.zone, zonefile.generate({
       "$origin": domain.zone+".",

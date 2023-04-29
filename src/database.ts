@@ -2,7 +2,7 @@ import { DB } from "sqlite";
 import { Session } from "./sessions.ts";
 import { DNSRecord } from "./domains.ts";
 
-const db = new DB("yourflare.db");
+export const db = new DB("yourflare.db");
 
 db.execute(`
   CREATE TABLE IF NOT EXISTS users (
