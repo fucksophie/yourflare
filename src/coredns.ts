@@ -101,7 +101,7 @@ class CorednsManager {
     
     aRecords = aRecords.map(z => {
       z.fields = z.fields.map(y => {
-        if(y == domain.zone) return "@";
+        if(y == domain.zone) return "";
         return y;
       })
       return z;
