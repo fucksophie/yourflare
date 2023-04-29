@@ -5,8 +5,8 @@
 1. Opensource DNS managment
 2. Supports cookie-based sessions with HTTPonly
 3. Written in Preact/Tailwind using Fresh
-4. Extremely quick setup,   
-4.1 Move `config/example.passwordHash.ts` to `config/passwordHash.ts`
+4. Extremely quick setup,  
+4.1 Move `config/example.passwordHash.ts` to `config/passwordHash.ts`  
 4.2 Move `config/example.settings.ts` to `config/settings.ts`  
 4.3 Edit the renamed files  
 4.4 Run `deno task start`.
