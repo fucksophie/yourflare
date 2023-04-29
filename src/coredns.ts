@@ -106,9 +106,13 @@ class CorednsManager {
       })
       return z;
     })
-    
-    aRecords = aRecords.sort(z => z.fields[0]?.startsWith("@")?1:0)
 
+    // @ts-ignore: the minus coercion is correct under js
+    aRecords = aRecords.sort((a, b) => a.fields[0].startsWith('@') - b.fields[0].startsWith('@'))
+    
+    // @ts-ignore: the minus coercion is correct under js
+    aRecords = aRecords.sort((a, b) => a.fields[0].startsWith('*') - b.fields[0].startsWith('*'))
+    
     Deno.writeTextFileSync("coredns/zones/db."+domain.zone, zonefile.generate({
       "$origin": domain.zone+".",
       "$ttl": domain.ttl,
