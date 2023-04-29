@@ -98,6 +98,14 @@ class CorednsManager {
       aRecords.push(record1);
       aRecords.push(record2);
     }
+    
+    aRecords = aRecords.map(z => {
+      z.fields = z.fields.map(y => {
+        if(y == domain.zone) return "@";
+        return y;
+      })
+      return z;
+    })
 
     Deno.writeTextFileSync("coredns/zones/db."+domain.zone, zonefile.generate({
       "$origin": domain.zone+".",
