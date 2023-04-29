@@ -83,7 +83,7 @@ class CorednsManager {
     const root2 = settings.nameservers[1].name.split(".").slice(-2).join('.')
     
     const subdomain1 = settings.nameservers[0].name.split(".").slice(0, -2).join('.')
-    const subdomain2 = settings.nameservers[0].name.split(".").slice(0, -2).join('.')
+    const subdomain2 = settings.nameservers[1].name.split(".").slice(0, -2).join('.')
 
     if(root1 == domain.zone && root2 == domain.zone) {
       const record1 = new DNSRecord("a");
@@ -92,7 +92,7 @@ class CorednsManager {
       record2.setFields([subdomain2, settings.nameservers[1].ip]);
 
       if(!domain.records.a) domain.records.a = [];
-      
+
       domain.records.a.push(record1);
       domain.records.a.push(record2);
     }
