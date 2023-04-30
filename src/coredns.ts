@@ -227,8 +227,8 @@ class Coredns {
       stdout: "piped"
     })
 
-    const y = new TextDecoder().decode(await process.output()).split(" ");    console.log({name: y[0],ttl:domain.ttl,key_tag:y[3],algorithm:y[4],digest_type:y[5],digest:y[6]})
-
+    const y = new TextDecoder().decode(await process.output()).split(" ");
+    
     return {name: y[0],ttl:domain.ttl,key_tag:y[3],algorithm:y[4],digest_type:y[5],digest:y[6]};
   }
 
