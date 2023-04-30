@@ -73,7 +73,7 @@ export const handler = async (
       && nameservers[1] == settings.nameservers[1].name)) {
       domain.status = "linked";
       domain.commit();
-      coredns.updateDomain(domain);
+      await coredns.updateDomain(domain);
       clearInterval(deleteInterval);
       clearInterval(original)
     }      

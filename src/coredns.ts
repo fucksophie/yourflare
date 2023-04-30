@@ -68,15 +68,15 @@ class Coredns {
     }
   }
   
-  updateDomain(domain: Domain) {
+  async updateDomain(domain: Domain) {
     domain.serial++;
     domain.commit();
 
-    Deno.writeTextFileSync("coredns/zones/db."+domain.zone, this.generateZonefile(domain))
+    Deno.writeTextFileSync("coredns/zones/db."+domain.zone, await this.generateZonefile(domain))
   }
 
   async createDomain(domain: Domain) {
-    Deno.writeTextFileSync("coredns/zones/db."+domain.zone, this.generateZonefile(domain))
+    Deno.writeTextFileSync("coredns/zones/db."+domain.zone, await this.generateZonefile(domain))
     await this.generateCorefile();
   }
 
@@ -150,7 +150,7 @@ class Coredns {
     return domainsToDNSSec;
   }
   
-  private generateZonefile(domain: Domain) {  
+  private async generateZonefile(domain: Domain) {  
     const root1 = settings.nameservers[0].name.split(".").slice(-2).join('.')
     const root2 = settings.nameservers[1].name.split(".").slice(-2).join('.')
     
@@ -207,10 +207,31 @@ class Coredns {
       aaaa: domain.records.aaaa?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
       a: aRecords?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
       mx: domain.records.mx?.map(z => { return { preference: +z.fields[0], host: z.fields[1] } }),
-      srv: domain.records.srv?.map(z => { return { name: z.fields[0], target: z.fields[1], priority: +z.fields[2], weight: +z.fields[3], port: +z.fields[4] } })
+      srv: domain.records.srv?.map(z => { return { name: z.fields[0], target: z.fields[1], priority: +z.fields[2], weight: +z.fields[3], port: +z.fields[4] } }),
+      ds: [
+        await this.getDSRecord(domain)
+      ]
     });
   }
   
+  private async getDSRecord(domain: Domain) {
+    const dnssec = this.listCerts();
+
+    if(!dnssec[domain.zone]) return;
+
+    const process = Deno.run({
+      cmd: ["dnssec-dsfromkey", dnssec[domain.zone]],
+      cwd: Deno.cwd()+"/coredns/dnssec",
+      stderr: "null",
+      stdin: "null",
+      stdout: "piped"
+    })
+
+    const y = new TextDecoder().decode(await process.output()).split(" ");    console.log({name: y[0],ttl:domain.ttl,key_tag:y[3],algorithm:y[4],digest_type:y[5],digest:y[6]})
+
+    return {name: y[0],ttl:domain.ttl,key_tag:y[3],algorithm:y[4],digest_type:y[5],digest:y[6]};
+  }
+
   private async createFolders() {
     if(!await exists("coredns/")) {
       console.log("[DNS] Most likely first boot!")

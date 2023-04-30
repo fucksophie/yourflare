@@ -40,6 +40,6 @@ export const handler = async (
   const domain = Domain.findId(id)!;
   domain.ttl = ttl;
   domain.commit()
-  coredns.updateDomain(domain);
+  await coredns.updateDomain(domain);
   return jsonResponse({success: true});
 };

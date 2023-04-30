@@ -70,7 +70,7 @@ export const handler = async (
   
   domain.records = recordsProper;
   domain.commit();
-  coredns.updateDomain(domain);
+  await coredns.updateDomain(domain);
   if(response) return response;
   return jsonResponse({success: true});
   

@@ -23,7 +23,7 @@
 7. Start it back up!
 
 ### Requirements
-Yourflare requires the `dnssec-keygen` utility. Install it via `sudo apt-get install bind9utils`
+Yourflare requires the `dnssec-keygen` and the `dnssec-dsfromkey` utilities. Install them via `sudo apt-get install bind9utils`
 
 ### Why?
 My domain provider doesn't allow me to use more than 10 A records, and using a wildcard is kind of a pain since I don't know what I'm hosting.
