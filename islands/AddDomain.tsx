@@ -52,8 +52,9 @@ export default class AddDomain extends Component {
     const input = document.getElementById("domain") as HTMLInputElement
     if(!input.value) return;
     const parts = input.value.split(".").filter(Boolean);
-    if(parts.length < 2) return;
-    await this.addDomain(parts.at(-2)+"."+parts.at(-1));
+    let url = input.value;
+    if(parts.length > 2) url = parts.at(-2)+"."+parts.at(-1);
+    await this.addDomain(url);
   }
 
   render(): ComponentChild {

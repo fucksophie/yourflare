@@ -157,7 +157,7 @@ class Coredns {
     const subdomain1 = settings.nameservers[0].name.split(".").slice(0, -2).join('.')
     const subdomain2 = settings.nameservers[1].name.split(".").slice(0, -2).join('.')
     
-    let aRecords = domain.records.a;
+    let aRecords = domain.records.a||[];
 
     if(root1 == domain.zone && root2 == domain.zone) {
       const record1 = new DNSRecord("a");
@@ -184,7 +184,7 @@ class Coredns {
     
     // @ts-ignore: the minus coercion is correct under js
     aRecords = aRecords.sort((a, b) => a.fields[0].startsWith('*') - b.fields[0].startsWith('*'))
-    
+
     return zonefile.generate({
       "$origin": domain.zone+".",
       "$ttl": domain.ttl,
@@ -217,7 +217,7 @@ class Coredns {
   private async getDSRecord(domain: Domain) {
     const dnssec = this.listCerts();
 
-    if(!dnssec[domain.zone]) return;
+    if(!dnssec[domain.zone]) return {};
 
     const process = Deno.run({
       cmd: ["dnssec-dsfromkey", dnssec[domain.zone]],
