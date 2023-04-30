@@ -2,7 +2,7 @@ import { HandlerContext } from "$fresh/server.ts";
 import { checkLoginStatus } from "../../src/lib.ts";
 import { Domain, User } from "../../src/database.ts";
 import { jsonResponse } from "../../src/validation.ts";
-import { deleteZonefile } from "../../src/coredns.ts";
+import coredns from "../../src/coredns.ts";
 
 export const handler = async (
   _req: Request,
@@ -24,13 +24,13 @@ export const handler = async (
     }
   }
 
-  user.domains.forEach(z => {
+  for await(const z of user.domains) {
     const domain = Domain.findId(z)!;
     if(domain.findAllUsers().length == 1) {
+      await coredns.deleteDomain(domain);
       domain.delete();
-      deleteZonefile(domain);
     }
-  })
+  }
 
   user.delete();
   return jsonResponse({success: true});  

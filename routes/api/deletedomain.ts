@@ -3,7 +3,7 @@ import { checkLoginStatus } from "../../src/lib.ts";
 import { Domain, User } from "../../src/database.ts";
 import { DomainID } from "../../src/domains.ts";
 import { jsonResponse, validationError } from "../../src/validation.ts";
-import { deleteZonefile } from "../../src/coredns.ts";
+import coredns from "../../src/coredns.ts";
 
 export const handler = async (
   _req: Request,
@@ -29,8 +29,8 @@ export const handler = async (
     return jsonResponse({error: "You do not have permission to access this domain"}, 400);
   }
   const domain = Domain.findId(id)!;
+  await coredns.deleteDomain(domain);
   domain.delete();
-  deleteZonefile(domain);
   
   domain.findAllUsers().forEach(z => {
     const zzzz = User.findId(z)!;

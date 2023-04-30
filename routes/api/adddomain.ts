@@ -4,9 +4,9 @@ import { Zone } from "../../src/domains.ts"
 import { isValidTLD } from "../../src/lib.ts"
 
 import { Domain, User } from "../../src/database.ts";
-import { deleteZonefile, updateZonefile } from "../../src/coredns.ts"
 import { jsonResponse, validationError } from "../../src/validation.ts";
 import { settings } from "../../config/settings.ts";
+import coredns from "../../src/coredns.ts";
 
 export const handler = async (
   _req: Request,
@@ -50,8 +50,9 @@ export const handler = async (
   domain.commit();
   user.domains.push(domain.id);
   user.commit();
-  updateZonefile(domain); // Make sure we are serving NS records
 
+  coredns.createDomain(domain);
+  
   const original = setInterval(async () => {
     try {
       rawNameservers = await Deno.resolveDns(zone, "NS", {
@@ -72,16 +73,16 @@ export const handler = async (
       && nameservers[1] == settings.nameservers[1].name)) {
       domain.status = "linked";
       domain.commit();
-      updateZonefile(domain);
+      coredns.updateDomain(domain);
       clearInterval(deleteInterval);
       clearInterval(original)
     }      
   }, 2000)
 
-  const deleteInterval = setTimeout(()=>{
+  const deleteInterval = setTimeout(async ()=>{
     clearInterval(original);
+    await coredns.deleteDomain(domain);
     domain.delete();
-    deleteZonefile(domain);
     if(User.findRawId(user.id).length != 0) { // Check if user's 
       const newUser = User.findId(user.id)!; // An long time has passed. Most likely this user's information has been changed.
       newUser.domains = newUser.domains.filter(z => z != domain.id);

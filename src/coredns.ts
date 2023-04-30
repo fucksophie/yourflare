@@ -1,52 +1,14 @@
-import { readLines } from "https://deno.land/std@0.129.0/io/buffer.ts";
-import { Domain } from "./database.ts";
 import { tgz } from "https://deno.land/x/compress@v0.4.4/mod.ts";
-
-import zonefile from 'https://deno.land/x/zonefile@0.3.0/lib/zonefile.js';
 import { exists } from "./lib.ts";
+import { readLines } from "https://deno.land/std@0.129.0/io/buffer.ts";
 import { settings } from "../config/settings.ts";
+import { Domain } from "./database.ts";
 import { DNSRecord } from "./domains.ts";
+import zonefile from "https://deno.land/x/zonefile@0.3.0/lib/zonefile.js";
 
-if(!await exists("coredns/")) {
-  console.log("[DNS] Most likely first boot!")
-  Deno.mkdirSync("coredns");
-}
-
-if(!await exists("coredns/coredns")) {
-  if(!await exists("coredns/coredns.tgz")) {
-    console.log("[DNS] Downloading coredns.tgz!")
-    const request = await fetch("https://github.com/coredns/coredns/releases/download/v1.10.1/coredns_1.10.1_linux_amd64.tgz");
-    Deno.writeFileSync("coredns/coredns.tgz", new Uint8Array(await request.arrayBuffer()))
-  }
-  console.log("[DNS] Decompressing tgz!")
-  await tgz.uncompress("coredns/coredns.tgz", "coredns/");
-  Deno.removeSync("coredns/coredns.tgz")
-  Deno.chmodSync("coredns/coredns", 0o777);
-}
-
-if(!await exists("coredns/zones/")) {
-  console.log("[DNS] Creating zones folder")
-  Deno.mkdirSync("coredns/zones")
-}
-
-Deno.writeTextFileSync("coredns/Corefile", `.:53 {
-  forward . 8.8.8.8
-
-  reload 10s
-
-  auto {
-    directory ${Deno.cwd()}/coredns/zones
-    reload 10s
-  }
-
-  log
-  errors
-  cache
-}`);
-
-class CorednsManager {
-  process: Deno.Process;
-
+class Coredns {
+  process!: Deno.Process;
+  
   async reader(
     reader: Deno.Reader,
   ) {
@@ -65,8 +27,21 @@ class CorednsManager {
       }
     }
   }
-
-  constructor() {
+  
+  async start() {
+    if(await exists("coredns")) {
+      if(await exists("coredns/zones")) {
+        for (const i of Deno.readDirSync("coredns/zones")) {
+          Deno.removeSync("coredns/zones/"+i.name)  
+        }
+      }
+    }
+    
+    await this.createFolders();
+    
+    for await(const y of Domain.getAllIds()) {
+      await this.createDomain(Domain.findId(y)!);
+    }
     this.process = Deno.run({
       cmd: ["./coredns"],
       cwd: "coredns/",
@@ -76,9 +51,106 @@ class CorednsManager {
 
     this.reader(this.process.stdout!)
     this.reader(this.process.stderr!)
+    
   }
 
-  generateZonefile(domain: Domain) {  
+  private async downloadCoredns() {
+    if(!await exists("coredns/coredns")) {
+      if(!await exists("coredns/coredns.tgz")) {
+        console.log("[DNS] Downloading coredns.tgz!")
+        const request = await fetch("https://github.com/coredns/coredns/releases/download/v1.10.1/coredns_1.10.1_linux_amd64.tgz");
+        Deno.writeFileSync("coredns/coredns.tgz", new Uint8Array(await request.arrayBuffer()))
+      }
+      console.log("[DNS] Decompressing tgz!")
+      await tgz.uncompress("coredns/coredns.tgz", "coredns/");
+      Deno.removeSync("coredns/coredns.tgz")
+      Deno.chmodSync("coredns/coredns", 0o777);
+    }
+  }
+  
+  updateDomain(domain: Domain) {
+    domain.serial++;
+    domain.commit();
+
+    Deno.writeTextFileSync("coredns/zones/db."+domain.zone, this.generateZonefile(domain))
+  }
+
+  async createDomain(domain: Domain) {
+    Deno.writeTextFileSync("coredns/zones/db."+domain.zone, this.generateZonefile(domain))
+    await this.generateCorefile();
+  }
+
+  async deleteDomain(domain: Domain) {
+    await this.generateCorefile();
+
+    Deno.removeSync("coredns/zones/db."+domain.zone); 
+    const dnssec = this.listCerts();
+
+    Deno.removeSync(`coredns/dnssec/${dnssec[domain.zone]}.key`)
+    Deno.removeSync(`coredns/dnssec/${dnssec[domain.zone]}.private`)
+  }
+
+  private async generateCorefile() {
+    let corefile = "";
+  
+    let dnssec = this.listCerts();
+    for await (const d of Domain.getAllDomains()) {
+      if(!dnssec[d.zone]) {
+        console.log("[DNS] Creating DNSsec for " + d.zone + "!")
+        const process = Deno.run({
+          cmd: ["dnssec-keygen", "-a", "ECDSAP256SHA256", d.zone],
+          cwd: Deno.cwd()+"/coredns/dnssec",
+          stderr: "null",
+          stdin: "null",
+          stdout: "null"
+        })
+        await process.status();
+      }
+    }
+    dnssec = this.listCerts();
+
+    Object.entries(dnssec).forEach(v => {
+      corefile += `${v[0]} {
+  dnssec {
+    key file ${Deno.cwd()}/coredns/dnssec/${v[1]}
+  }
+
+  auto {
+    directory ${Deno.cwd()}/coredns/zones
+    reload 10s
+  }
+  reload 10s
+}
+    `
+    })
+  
+    corefile +=`
+.:53 {
+  forward . 8.8.8.8
+
+  reload 10s
+
+  log
+  errors
+  cache
+}`;
+    Deno.writeTextFileSync("coredns/Corefile", corefile);
+
+  }
+  private listCerts() {
+    const domainsToDNSSec:Record<string, string> = {};
+
+    Domain.getAllDomains().forEach(d => {
+      for(const z of Deno.readDirSync("coredns/dnssec")) {
+        if(z.name.startsWith("K"+d.zone+".")) {
+          domainsToDNSSec[d.zone] = z.name.split(".").slice(0, -1).join(".");
+        }
+      }
+    })
+    return domainsToDNSSec;
+  }
+  
+  private generateZonefile(domain: Domain) {  
     const root1 = settings.nameservers[0].name.split(".").slice(-2).join('.')
     const root2 = settings.nameservers[1].name.split(".").slice(-2).join('.')
     
@@ -113,14 +185,14 @@ class CorednsManager {
     // @ts-ignore: the minus coercion is correct under js
     aRecords = aRecords.sort((a, b) => a.fields[0].startsWith('*') - b.fields[0].startsWith('*'))
     
-    Deno.writeTextFileSync("coredns/zones/db."+domain.zone, zonefile.generate({
+    return zonefile.generate({
       "$origin": domain.zone+".",
       "$ttl": domain.ttl,
       "soa": {
         "mname": settings.nameservers[0].name+".",
-        "rname": "friend.yourfriend.lv.",
+        "rname": "dns.141.lv.",
         "serial": domain.serial+"",
-        refresh: 3600,
+        refresh: domain.ttl,
         retry: 600,
         expire: 604800,
         minimum: "86400"
@@ -136,30 +208,29 @@ class CorednsManager {
       a: aRecords?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
       mx: domain.records.mx?.map(z => { return { preference: +z.fields[0], host: z.fields[1] } }),
       srv: domain.records.srv?.map(z => { return { name: z.fields[0], target: z.fields[1], priority: +z.fields[2], weight: +z.fields[3], port: +z.fields[4] } })
-    }));
+    });
   }
-}
-
-if(await exists("coredns")) {
-  if(await exists("coredns/zones")) {
-    for (const i of Deno.readDirSync("coredns/zones")) {
-      Deno.removeSync("coredns/zones/"+i.name)  
+  
+  private async createFolders() {
+    if(!await exists("coredns/")) {
+      console.log("[DNS] Most likely first boot!")
+      Deno.mkdirSync("coredns");
+    }
+    
+    await this.downloadCoredns();
+    
+    if(!await exists("coredns/zones/")) {
+      console.log("[DNS] Creating zones folder")
+      Deno.mkdirSync("coredns/zones")
+    }
+    
+    if(!await exists("coredns/dnssec/")) {
+      console.log("[DNS] Creating dnssec folder")
+      Deno.mkdirSync("coredns/dnssec")
     }
   }
 }
 
-const manager = new CorednsManager();
-
-export function updateZonefile(domain: Domain) {
-  domain.serial++;
-  domain.commit();
-  manager.generateZonefile(domain);
-}
-
-export function deleteZonefile(domain: Domain) {
-  Deno.removeSync("coredns/zones/db."+domain.zone);  
-}
-
-Domain.getAllIds().forEach(y => {
-  manager.generateZonefile(Domain.findId(y)!);
-})
+const coredns = new Coredns();
+await coredns.start()
+export default coredns;

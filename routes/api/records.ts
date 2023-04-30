@@ -1,9 +1,9 @@
 import { HandlerContext } from "$fresh/server.ts";
 import { checkLoginStatus, } from "../../src/lib.ts";
 import { Domain } from "../../src/database.ts";
-import { updateZonefile } from "../../src/coredns.ts";
 import { DNSRecord, DomainID, RecordType, allowedRecords } from "../../src/domains.ts";
 import { jsonResponse, validationError } from "../../src/validation.ts";
+import coredns from "../../src/coredns.ts";
 
 // deno-lint-ignore no-explicit-any
 function shallowEqual(a: any[], b: any[]) {
@@ -70,7 +70,7 @@ export const handler = async (
   
   domain.records = recordsProper;
   domain.commit();
-  updateZonefile(domain);
+  coredns.updateDomain(domain);
   if(response) return response;
   return jsonResponse({success: true});
   
