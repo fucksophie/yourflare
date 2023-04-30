@@ -156,34 +156,36 @@ class Coredns {
     
     const subdomain1 = settings.nameservers[0].name.split(".").slice(0, -2).join('.')
     const subdomain2 = settings.nameservers[1].name.split(".").slice(0, -2).join('.')
-    
-    let aRecords = domain.records.a||[];
 
+    const records: Record<string, DNSRecord[]> = {...domain.records};
+    
     if(root1 == domain.zone && root2 == domain.zone) {
       const record1 = new DNSRecord("a");
       const record2 = new DNSRecord("a");
       record1.setFields([subdomain1, settings.nameservers[0].ip]);
       record2.setFields([subdomain2, settings.nameservers[1].ip]);
 
-      if(!aRecords) aRecords = [];
+      if(!records.a) records.a = [];
 
-      aRecords.push(record1);
-      aRecords.push(record2);
+      records.a.push(record1);
+      records.a.push(record2);
     }
     
-    aRecords = aRecords.map(z => {
-      z.fields = z.fields.map(y => {
-        if(y == domain.zone) return "@";
-        return y;
+    for(const z of Object.entries(records)) {
+      records[z[0]] = z[1].map(z => {
+        z.fields = z.fields.map(y => {
+          if(y == domain.zone) return "@";
+          return y;
+        })
+        return z;
       })
-      return z;
-    })
 
-    // @ts-ignore: the minus coercion is correct under js
-    aRecords = aRecords.sort((a, b) => a.fields[0].startsWith('@') - b.fields[0].startsWith('@'))
-    
-    // @ts-ignore: the minus coercion is correct under js
-    aRecords = aRecords.sort((a, b) => a.fields[0].startsWith('*') - b.fields[0].startsWith('*'))
+      // @ts-ignore: the minus coercion is correct under js
+      records[z[0]] = z[1].sort((a, b) => a.fields[0].startsWith('@') - b.fields[0].startsWith('@'))
+      
+      // @ts-ignore: the minus coercion is correct under js
+      records[z[0]] = z[1].sort((a, b) => a.fields[0].startsWith('*') - b.fields[0].startsWith('*'))
+    }
 
     return zonefile.generate({
       "$origin": domain.zone+".",
@@ -200,14 +202,14 @@ class Coredns {
       ns: [
         { host: settings.nameservers[0].name+"." }, 
         { host: settings.nameservers[1].name+"." },
-        ...(domain.records.ns?.map(z => { return { host: z.fields[0] } })||[])
+        ...(records.ns?.map(z => { return { host: z.fields[0] } })||[])
       ],
-      txt: domain.records.txt?.map(z => { return { name: z.fields[0], txt: "\""+z.fields[1]+"\"" } }),
-      cname: domain.records.cname?.map(z => { return { name: z.fields[0], alias: z.fields[1] } }),
-      aaaa: domain.records.aaaa?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
-      a: aRecords?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
-      mx: domain.records.mx?.map(z => { return { preference: +z.fields[0], host: z.fields[1] } }),
-      srv: domain.records.srv?.map(z => { return { name: z.fields[0], target: z.fields[1], priority: +z.fields[2], weight: +z.fields[3], port: +z.fields[4] } }),
+      txt: records.txt?.map(z => { return { name: z.fields[0], txt: "\""+z.fields[1]+"\"" } }),
+      cname: records.cname?.map(z => { return { name: z.fields[0], alias: z.fields[1] } }),
+      aaaa: records.aaaa?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
+      a: records.a?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
+      mx: records.mx?.map(z => { return { preference: +z.fields[0], host: z.fields[1] } }),
+      srv: records.srv?.map(z => { return { name: z.fields[0], target: z.fields[1], priority: +z.fields[2], weight: +z.fields[3], port: +z.fields[4] } }),
       ds: [
         await this.getDSRecord(domain)
       ]
