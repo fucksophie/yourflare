@@ -19,7 +19,7 @@ export function Th(props: JSX.HTMLAttributes<HTMLTableSectionElement>) {
 }
 
 export function Tr(props: JSX.HTMLAttributes<HTMLTableSectionElement>) {
-  const elem = <tr class="hover:bg-slate-200 rounded max-w-min px-1">{props.children}</tr>;
+  const elem = <tr class="hover:bg-slate-200 rounded max-h-min overflow-scroll px-1">{props.children}</tr>;
   Object.entries(props).forEach((v) => {
     if(v[0] == "children") return;
     elem.props[v[0]] = v[1];
@@ -165,7 +165,7 @@ export default class DomainPage extends Component {
       </tr>
         {
           v[1].map(y => {
-            return <Tr onClick={async (g) => await this.removeRecord(v[0], g.target as HTMLTableCellElement)}>{y.fields.map(b => {return <td>{b}</td>})}</Tr>
+            return <Tr onClick={async (g) => await this.removeRecord(v[0], g.target as HTMLTableCellElement)}>{y.fields.map((b,i) => {if(i==0)return<td>{b}</td>;else return <Td>{b}</Td>})}</Tr>
           })
         }
       </>);
