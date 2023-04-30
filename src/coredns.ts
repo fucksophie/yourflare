@@ -130,7 +130,7 @@ class CorednsManager {
         { host: settings.nameservers[1].name+"." },
         ...(domain.records.ns?.map(z => { return { host: z.fields[0] } })||[])
       ],
-      txt: domain.records.txt?.map(z => { return { name: z.fields[0], txt: z.fields[1] } }),
+      txt: domain.records.txt?.map(z => { return { name: z.fields[0], txt: "\""+z.fields[1]+"\"" } }),
       cname: domain.records.cname?.map(z => { return { name: z.fields[0], alias: z.fields[1] } }),
       aaaa: domain.records.aaaa?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
       a: aRecords?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
