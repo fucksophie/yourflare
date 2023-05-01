@@ -3,7 +3,7 @@ import { validationError } from './validation.ts';
 
 const asciiOnly = /^[a-zA-Z.0-9_*-]+$/;
 // const simpleDomainRegex = /^[a-zA-Z0-9_][a-zA-Z0-9-_]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/gm
-const domainWithSubdomainRegex = /^[[a-zA-Z0-9_.]{1,61}\.(.+)$/gm
+const domainWithSubdomainRegex = /^[[a-zA-Z0-9_.-]{1,61}\.(.+)$/gm
 
 const Name = z.string().max(255).min(1).regex(asciiOnly);
 const Host = z.string().regex(domainWithSubdomainRegex);
