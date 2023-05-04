@@ -18,6 +18,7 @@ const Weight = Preference;
 const Priority = Preference;
 const Port = Preference;
 const Value = Txt;
+const Arpa = Host;
 
 export const namedTypes: Record<string, Record<string, z.ZodNumber|z.ZodString>> = {
   a: {Name, Ipv4},
@@ -27,7 +28,9 @@ export const namedTypes: Record<string, Record<string, z.ZodNumber|z.ZodString>>
   txt: {Name, Txt},
   mx: {Preference, Host},
   srv: {Name, Target, Priority, Weight, Port},
-  caa: {Name, Flags, Tag, Value}
+  caa: {Name, Flags, Tag, Value},
+  spf: {Name, Txt},
+  ptr: {Arpa, Host}
 }
 
 export const supportedRecords = Object.keys(namedTypes);

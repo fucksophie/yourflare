@@ -209,6 +209,8 @@ class Coredns {
       mx: records.mx?.map(z => { return { preference: +z.fields[0], host: z.fields[1] } }),
       srv: records.srv?.map(z => { return { name: z.fields[0], target: z.fields[1], priority: +z.fields[2], weight: +z.fields[3], port: +z.fields[4] } }),
       caa: records.caa?.map(z => { return { name: z.fields[0], flags: +z.fields[1], tag: z.fields[2], value: z.fields[3] } }),
+      ptr: records.ptr?.map(z => { return { name: z.fields[0], host: z.fields[1]} }),
+      spf: records.spf?.map(z => { return { name: z.fields[0], data: z.fields[1]} }),
       ds: [
         await this.getDSRecord(domain)
       ]
