@@ -125,6 +125,10 @@ class Coredns {
     })
   
     corefile +=`
+version.bind version.server authors.bind hostname.bind id.server {
+  chaos yourflare-${Deno.readTextFileSync(".git/FETCH_HEAD").slice(0, 6)} friend@yourfriend.lv yourflare-contrib
+}
+
 .:53 {
   forward . 8.8.8.8
 
