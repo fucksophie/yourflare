@@ -88,15 +88,17 @@ export default class DomainPage extends Component {
         ...ToastDefault,
         text: "Records modified!"
       }).showToast();
-      this.forceUpdate();
     } else {
       Toastify({
         ...ToastDefault,
         text: json.error,
       }).showToast();
       this.props.domain.records = previousRecords;
-      this.forceUpdate();
     }
+
+    const records = document.getElementById("records")!;
+    records.innerHTML = "";
+    render(this.renderRecords(), records);
   }
 
   async removeRecord(type: string, a: HTMLTableCellElement) {
@@ -221,7 +223,7 @@ export default class DomainPage extends Component {
         <Hr></Hr>
 
         <div>Current records</div>
-        <table class="flex flex-col">
+        <table class="flex flex-col" id="records">
           {this.renderRecords()}
         </table>
       </>
