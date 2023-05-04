@@ -1,5 +1,6 @@
 # yourflare
-## Version: 1
+## Version: 2
+
 
 ### Talking points:
 1. Opensource DNS managment
@@ -12,6 +13,7 @@
 4.4 Run `deno task start`.
 5. Full integration with Coredns through src/coredns.ts
 6. Automatic DNS Zonefile creation and managment
+7. Full DNSSEC/DS record authenication
 
 ### How do I gain admin status?
 1. Run the app for the first time
@@ -21,6 +23,45 @@
 5. Shut down the App
 6. Run `sqlite3 yourflare.db` and run `UPDATE users SET admin = TRUE WHERE id = 'THEIDYOUCOPIED'`
 7. Start it back up!
+
+### Migrate from version 1
+Version 2 added dots to all Host-typed DNS records. This means that for example, the CNAME record didn't have a dot at the end of it
+which means it would, instead of serving helloworld.com, serve helloworld.com.yourflare.domain. Which.. is wrong. I've fixed this in version 2. 
+
+This script implements this change:
+```js
+import { Domain } from "./src/database.ts";
+import { DNSRecord } from "./src/domains.ts";
+
+Domain.getAllDomains().forEach(y => {
+  const domain = Domain.findId(y.id)!;
+
+  const records = Object.entries(domain.records);
+  const recordsnew: Record<string, DNSRecord[]> = {}
+  
+  console.log("analyzing domain: " + domain.zone);
+
+  records.forEach(g => {
+    console.log("analyzing record: " + g[0])
+    recordsnew[g[0]] = g[1].map(z => {
+      const rec = new DNSRecord(z.type).getFieldTypes();
+
+      z.fields.forEach((m,i) => {
+        if(Object.entries(rec)[i][0] == "Host") {
+          console.log("detected! setting to " + m + ".")
+          z.fields[i] = m+'.';
+        }
+      })
+
+      return z;
+    })
+  })
+
+  domain.records = recordsnew;
+  domain.serial++;
+  domain.commit();
+})
+```
 
 ### Requirements
 Yourflare requires the `dnssec-keygen` and the `dnssec-dsfromkey` utilities. Install them via `sudo apt-get install bind9utils`
