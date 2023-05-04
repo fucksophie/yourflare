@@ -125,7 +125,7 @@ class Coredns {
     })
   
     corefile +=`
-version.bind version.server authors.bind hostname.bind id.server {
+version.bind version.server authors.bind {
   chaos yourflare-${Deno.readTextFileSync(".git/FETCH_HEAD").slice(0, 6)} friend@yourfriend.lv yourflare-contrib
 }
 
