@@ -11,10 +11,13 @@ const Target = Host;
 const Ipv4 = z.string().ip({version: "v4"});
 const Ipv6 = z.string().regex(/(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/gm)
 const Txt = z.string().max(65535).min(1);
+const Tag = z.string().regex(/^(issue|issuewild|iodef|contactemail|contactphone)$/gm);
+const Flags = z.coerce.number().max(256).min(0);
 const Preference = z.coerce.number().max(65535).min(1);
 const Weight = Preference;
 const Priority = Preference;
 const Port = Preference;
+const Value = Txt;
 
 export const namedTypes: Record<string, Record<string, z.ZodNumber|z.ZodString>> = {
   a: {Name, Ipv4},
@@ -23,7 +26,8 @@ export const namedTypes: Record<string, Record<string, z.ZodNumber|z.ZodString>>
   ns: {Host},
   txt: {Name, Txt},
   mx: {Preference, Host},
-  srv: {Name, Target, Priority, Weight, Port}
+  srv: {Name, Target, Priority, Weight, Port},
+  caa: {Name, Flags, Tag, Value}
 }
 
 export const supportedRecords = Object.keys(namedTypes);

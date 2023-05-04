@@ -180,11 +180,9 @@ class Coredns {
         return z;
       })
 
-      // @ts-ignore: the minus coercion is correct under js
-      records[z[0]] = z[1].sort((a, b) => a.fields[0].startsWith('@') - b.fields[0].startsWith('@'))
+      records[z[0]] = z[1].sort((a, b) => +a.fields[0].startsWith('@') - +b.fields[0].startsWith('@'))
       
-      // @ts-ignore: the minus coercion is correct under js
-      records[z[0]] = z[1].sort((a, b) => a.fields[0].startsWith('*') - b.fields[0].startsWith('*'))
+      records[z[0]] = z[1].sort((a, b) => +a.fields[0].startsWith('*') - +b.fields[0].startsWith('*'))
     }
 
     return zonefile.generate({
@@ -210,6 +208,7 @@ class Coredns {
       a: records.a?.map(z => { return { name: z.fields[0], ip: z.fields[1] } }),
       mx: records.mx?.map(z => { return { preference: +z.fields[0], host: z.fields[1] } }),
       srv: records.srv?.map(z => { return { name: z.fields[0], target: z.fields[1], priority: +z.fields[2], weight: +z.fields[3], port: +z.fields[4] } }),
+      caa: records.caa?.map(z => { return { name: z.fields[0], flags: +z.fields[1], tag: z.fields[2], value: z.fields[3] } }),
       ds: [
         await this.getDSRecord(domain)
       ]
