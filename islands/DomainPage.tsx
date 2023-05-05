@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Attributes, Component, ComponentChild, JSX, render } from "preact";
-import { buttonClass, Hr } from "../routes/index.tsx";
+import { buttonClass, Hr } from  "../src/misc.tsx";
 import Toastify from 'https://esm.sh/toastify-js@1.12.0'
 import { ToastDefault } from "./Login.tsx";
 import { DNSRecord, recordDefinitions, supportedRecords } from "../src/domains.ts";

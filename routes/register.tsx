@@ -3,9 +3,6 @@ import Register from "../islands/Register.tsx";
 import { Handlers } from "$fresh/server.ts";
 import { checkLoginStatus } from "../src/lib.ts";
 
-export const buttonClass =
-  "px-10 bg-slate-300 rounded border-[1.5px] border-solid border-sky-500 hover:border-sky-700 transition-all";
-
 export const handler: Handlers<null> = {
   async GET(req, ctx) {
     if((await checkLoginStatus(req))[1] != undefined) {

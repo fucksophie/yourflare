@@ -1,11 +1,11 @@
 import { App } from "../components/App.tsx";
 import { checkLoginStatus, redirect } from "../src/lib.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
-import { Domain } from "../src/database.ts";
+import { Domain, User } from "../src/database.ts";
 import DomainPage from "../islands/DomainPage.tsx";
 import { DomainID } from "../src/domains.ts";
 
-type Props = { domain: Domain, admin: boolean }
+type Props = { domain: Domain, user: User, admin: boolean }
 export const handler: Handlers<Props> = {
   async GET(req, ctx) {
     const status = (await checkLoginStatus(req));
@@ -30,6 +30,7 @@ export const handler: Handlers<Props> = {
     
     return ctx.render({
       domain: Domain.findId(domain[0].id)!,
+      user: status[1],
       admin
     });
   },
@@ -38,7 +39,7 @@ export const handler: Handlers<Props> = {
 export default function domain({ data }: PageProps<Props>) {
   return (
     <>
-      <App>
+      <App user={data.user}>
         <DomainPage domain={data.domain} admin={data.admin}></DomainPage>
       </App>
     </>

@@ -50,15 +50,6 @@ export default class Dashboard extends Component {
       <>
         <h1 class="text-2xl">dashboard</h1>
         <Buttons>
-        {
-            (() => {
-              if(this.props.admin) {
-                return <a href="/admin" class="mb-2">Admin interface</a>
-              }
-              return <></>
-            })()
-          }
-
           <a href="/domains">your domains</a>
           <button onClick={() => this.deleteAccount()}>delete your account</button>
         </Buttons>

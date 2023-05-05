@@ -21,7 +21,7 @@ export const handler: Handlers<User> = {
 export default function adddomain({ data }: PageProps<User>) {
   return (
     <>
-      <App>
+      <App user={data}>
         <AddDomain></AddDomain>
       </App>
     </>

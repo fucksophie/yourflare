@@ -3,7 +3,7 @@ import { App } from "../components/App.tsx";
 import { Buttons } from "../components/Buttons.tsx";
 import { Domain, User } from "../src/database.ts";
 import { checkLoginStatus } from "../src/lib.ts";
-import { buttonClass, Hr } from "./index.tsx";
+import { buttonClass, Hr } from "../src/misc.tsx";
 
 export const handler: Handlers<User> = {
   async GET(req, ctx) {
@@ -25,7 +25,7 @@ export default function domains({ data }: PageProps<User>) {
 
   return (
     <>
-      <App>
+      <App user={data}>
         <h1 class="text-2xl">your domains</h1>
         <Hr></Hr>
         

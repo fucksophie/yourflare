@@ -1,5 +1,5 @@
 import { App } from "../components/App.tsx";
-import { Handlers } from "$fresh/server.ts";
+import { Handlers, PageProps } from "$fresh/server.ts";
 import { checkLoginStatus } from "../src/lib.ts";
 import { Domain, User } from "../src/database.ts";
 import Admin from "../islands/Admin.tsx";
@@ -22,10 +22,10 @@ export const handler: Handlers<User> = {
   },
 };
 
-export default function admin() {
+export default function domain({ data }: PageProps<User>) {
   return (
     <>
-      <App>
+      <App user={data}>
         <Admin users={User.getAllUsers()} domains={Domain.getAllDomains()}></Admin>
       </App>
     </>

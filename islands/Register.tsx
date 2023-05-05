@@ -1,6 +1,5 @@
-import { ComponentChild } from "https://esm.sh/v117/preact@10.11.0/src/index.js";
-import { buttonClass } from "../routes/index.tsx";
-import { Component } from "preact";
+import { buttonClass } from  "../src/misc.tsx";
+import { Component, ComponentChild } from "preact";
 import Toastify from 'https://esm.sh/toastify-js@1.12.0'
 import {asset} from "$fresh/runtime.ts";
 import { ToastDefault } from "./Login.tsx";

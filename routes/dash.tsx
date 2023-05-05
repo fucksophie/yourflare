@@ -18,10 +18,9 @@ export const handler: Handlers<User> = {
 };
 
 export default function dash({ data }: PageProps<User>) {
-
   return (
     <>
-      <App>
+      <App user={data}>
         <Dashboard admin={data.admin}></Dashboard>
       </App>
     </>
