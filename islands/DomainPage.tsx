@@ -63,7 +63,7 @@ export default class DomainPage extends Component {
     const previousRecords = JSON.parse(JSON.stringify(this.props.domain.records));
 
     if(!this.props.domain.records[type]) this.props.domain.records[type] = [];
-    const record = new DNSRecord(type as allowedRecords);
+    const record = new DNSRecord(type);
     record.setFields(fields)
     this.props.domain.records[type].push(record)
     await this.updateRecords(previousRecords);
@@ -167,7 +167,15 @@ export default class DomainPage extends Component {
       </tr>
         {
           v[1].map(y => {
-            return <Tr onClick={async (g) => await this.removeRecord(v[0], g.target as HTMLTableCellElement)}>{y.fields.map((b,i) => {if(i==0)return<td>{b}</td>;else return <Td>{b}</Td>})}</Tr>
+            return <Tr onClick={async (g) => await this.removeRecord(v[0], g.target as HTMLTableCellElement)}>
+              {
+                y.fields.map((field, index) => {
+                  if(index == 0) return<td>{field}</td>;
+                    else 
+                  return <Td>{field}</Td>
+                })
+              }
+            </Tr>
           })
         }
       </>);

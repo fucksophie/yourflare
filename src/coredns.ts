@@ -3,7 +3,7 @@ import { exists } from "./lib.ts";
 import { readLines } from "https://deno.land/std@0.129.0/io/buffer.ts";
 import { settings } from "../config/settings.ts";
 import { Domain } from "./database.ts";
-import { DNSRecord } from "./domains.ts";
+import { DNSRecord, namedTypes } from "./domains.ts";
 import zonefile from "https://deno.land/x/zonefile@0.3.0/lib/zonefile.js";
 
 class Coredns {
@@ -177,18 +177,22 @@ version.bind version.server authors.bind {
     
     for(const z of Object.entries(records)) {
       records[z[0]] = z[1].map(z => {
-        z.fields = z.fields.map(y => {
+        const fieldTypes = Object.keys(namedTypes[z.type]);
+        z.fields = z.fields.map((y,i) => {
+          if(fieldTypes[i] == "Host") return y+"."; 
           if(y == domain.zone) return "@";
           return y;
         })
         return z;
       })
-
+      
       records[z[0]] = z[1].sort((a, b) => +a.fields[0].startsWith('@') - +b.fields[0].startsWith('@'))
       
       records[z[0]] = z[1].sort((a, b) => +a.fields[0].startsWith('*') - +b.fields[0].startsWith('*'))
     }
 
+    // todo: write your own zonefile parser/writer
+    // with a better interface than this
     return zonefile.generate({
       "$origin": domain.zone+".",
       "$ttl": domain.ttl,

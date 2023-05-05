@@ -1,7 +1,7 @@
 import { HandlerContext } from "$fresh/server.ts";
 import { checkLoginStatus, } from "../../src/lib.ts";
 import { Domain } from "../../src/database.ts";
-import { DNSRecord, DomainID, RecordType, allowedRecords } from "../../src/domains.ts";
+import { DNSRecord, DomainID, RecordType } from "../../src/domains.ts";
 import { jsonResponse, validationError } from "../../src/validation.ts";
 import coredns from "../../src/coredns.ts";
 
@@ -54,7 +54,7 @@ export const handler = async (
         response = jsonResponse({error: "Request contained a duplicate record."}, 400);
         continue;
       }
-      const record = new DNSRecord(y.type as allowedRecords);
+      const record = new DNSRecord(y.type);
       record.setFields(y.fields);
       const rsp = record.validation();
       if(!rsp.ok) {
