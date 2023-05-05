@@ -3,7 +3,7 @@ import { Attributes, Component, ComponentChild, JSX, render } from "preact";
 import { buttonClass, Hr } from "../routes/index.tsx";
 import Toastify from 'https://esm.sh/toastify-js@1.12.0'
 import { ToastDefault } from "./Login.tsx";
-import { DNSRecord, allowedRecords, recordDefinitions, supportedRecords } from "../src/domains.ts";
+import { DNSRecord, recordDefinitions, supportedRecords } from "../src/domains.ts";
 import { Domain } from "../src/database.ts";
 
 function shallowEqual(a: any[], b: any[]) {
@@ -238,6 +238,3 @@ export default class DomainPage extends Component {
     );
   }
 }
-/*
-          <input placeholder="Name" class="w-20 pl-2 field"></input>
-          <input placeholder="Ipv4" class="w-20 pl-2 field"></input>*/

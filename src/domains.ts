@@ -6,7 +6,7 @@ const asciiOnly = /^[a-zA-Z.0-9_*-]+$/;
 const domainWithSubdomainRegex = /^[[a-zA-Z0-9_.-]{1,61}\.(.+)$/gm
 
 export const Name = z.string().max(255).min(1).regex(asciiOnly);
-export const Host = z.string().regex(domainWithSubdomainRegex).transform(z => z+'.');
+export const Host = z.string().regex(domainWithSubdomainRegex);
 const Target = Host;
 export const Ipv4 = z.string().ip({version: "v4"});
 export const Ipv6 = z.string().regex(/(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/gm)
@@ -35,7 +35,6 @@ export const namedTypes: Record<string, Record<string, z.ZodNumber|z.ZodString|z
 
 export const supportedRecords = Object.keys(namedTypes);
 const recordRegex = new RegExp("^("+supportedRecords.join("|")+")$")
-export type allowedRecords = typeof supportedRecords[number];
 
 export const TTL = z.number().max(86400).min(1);
 export const RecordType = z.string().regex(recordRegex, "Is not a part of the supported records: " + supportedRecords.join(", "));
@@ -49,10 +48,10 @@ Object.entries(namedTypes).map(z => {
 })
 
 export class DNSRecord {
-  type: allowedRecords;
+  type: string;
   fields: string[] = [];
   
-  constructor(type: allowedRecords) {
+  constructor(type: string) {
     this.type = type;
   }
   
