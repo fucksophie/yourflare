@@ -1,5 +1,5 @@
 # yourflare
-## Version: 3
+## Version: 4
 
 
 ### Talking points:
@@ -24,11 +24,11 @@
 6. Run `sqlite3 yourflare.db` and run `UPDATE users SET admin = TRUE WHERE id = 'THEIDYOUCOPIED'`
 7. Start it back up!
 
-### Migrate from v2 to v3
-Originally, v2 was meant to fix one hyper-specific issue to CNAME/MX/etc.. records,
-but the way I implemented my fix was frankly extremely stupid. v3 fixes this.
+### Migrate from v3 to v4
+Version 4 turns the `email` field from a basic-text field to `{}`.
 
-Delete all records from your panel that have dots in them.
+This migration is VERY easy, single SQL query:
+`UPDATE users SET email = '{}';`
 
 ### Requirements
 Yourflare requires the `dnssec-keygen` and the `dnssec-dsfromkey` utilities. Install them via `sudo apt-get install bind9utils`

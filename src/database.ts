@@ -39,10 +39,15 @@ interface RawUser {
   admin: boolean;
 }
 
+interface Email {
+  status: "verified"|"unverified"
+  email: string;
+}
+
 export class User {
   id: string;
   username: string;
-  email: string | undefined;
+  email: Email | Record<string | number | symbol, never> = {};
   domains: string[] = [];
   password: string;
   sessions: Session[] = [];
@@ -61,7 +66,7 @@ export class User {
 
       this.domains = JSON.parse(user.domains);
       this.id = user.id;
-      this.email = user.email;
+      this.email = JSON.parse(user.email);
       this.password = user.password;
       this.sessions = JSON.parse(user.sessions);
       this.admin = user.admin;
@@ -130,7 +135,7 @@ export class User {
       db.query("INSERT INTO users VALUES(?, ?, ?, ?, ?, ?, ?);", [
         this.id,
         this.username,
-        this.email,
+        JSON.stringify(this.email),
         JSON.stringify(this.domains),
         this.password,
         JSON.stringify(this.sessions),
@@ -141,7 +146,7 @@ export class User {
         "UPDATE users SET username = ?, email = ?, domains = ?, password = ?, sessions = ?, admin = ? WHERE id = ?",
         [
           this.username,
-          this.email,
+          JSON.stringify(this.email),
           JSON.stringify(this.domains),
           this.password,
           JSON.stringify(this.sessions),
