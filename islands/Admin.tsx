@@ -1,8 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Component, Attributes, ComponentChild, render, JSX  } from "preact";
 import { Buttons } from "../components/Buttons.tsx";
-import Toastify from 'https://esm.sh/toastify-js@1.12.0'
-import { ToastDefault } from "./Login.tsx";
+import { request } from "../src/misc.tsx";
 
 interface AdminAttributes extends Attributes {
   users: any[];
@@ -54,46 +53,7 @@ export default class Admin extends Component {
       return <option name={z.id}>{z.username}</option>
     });
   }
-  async deleteDomain() {
-    const request = await fetch("/api/deletedomain?id="+this.currentDomainID)
-    const json = await request.json();
 
-    if(request.ok) {
-      Toastify({
-        ...ToastDefault,
-        text: "Domain deleted."
-      }).showToast();
-      
-      setTimeout(()=>{
-        location.reload() // this requires a relod
-      }, 1000)
-    } else {
-      Toastify({
-        ...ToastDefault,
-        text: json.error,
-      }).showToast();
-    }
-  }
-
-  async deleteUser() {
-    const request = await fetch("/api/deleteuser?id="+this.currentUserID)
-    const json = await request.json();
-
-    if(request.ok) {
-      Toastify({
-        ...ToastDefault,
-        text: "User deleted."
-      }).showToast();
-      setTimeout(()=>{
-        location.reload() // this requires a relod
-      }, 1000)
-    } else {
-      Toastify({
-        ...ToastDefault,
-        text: json.error,
-      }).showToast();
-    }
-  }
   render(): ComponentChild {
     return (
       <>
@@ -110,8 +70,8 @@ export default class Admin extends Component {
         </select>
 
         <Buttons>
-          <button onClick={() => this.deleteUser()}>Delete user</button>
-          <button onClick={() => this.deleteDomain()}>Delete domain</button>
+          <button onClick={async () => await request("/api/deleteuser?id="+this.currentUserID, "User deleted.")}>Delete user</button>
+          <button onClick={async () => await request("/api/deletedomain?id="+this.currentDomainID, "Domain deleted.")}>Delete domain</button>
           <a id="modify">Modify domain</a>
         </Buttons>
       </>

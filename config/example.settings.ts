@@ -6,9 +6,18 @@ export const settings = {
     },
     {
       "name": "420NS.KEWL.NAMESERVERS",
-      "ip": "79.420.69.420"
+      "ip": "79.420.69.1337"
     }
   ],
-  debug: false
-
+  debug: false,
+  passwordHash: "silly hash :3",
+  email: {
+    hostname: "somesillymailserver.net",
+    port: 1024,
+    tls: true,
+    auth: {
+      username: "hi@somesillymailserver.net",
+      password: "verysecurepassword",
+    }
+  }
 };

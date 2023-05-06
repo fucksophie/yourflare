@@ -1,5 +1,5 @@
 import { ComponentChild } from "https://esm.sh/v117/preact@10.11.0/src/index.js";
-import { buttonClass } from  "../src/misc.tsx";
+import { buttonClass, request } from  "../src/misc.tsx";
 import { Component } from "preact";
 import Toastify from 'https://esm.sh/toastify-js@1.12.0'
 import {asset} from "$fresh/runtime.ts";
@@ -74,6 +74,18 @@ export default class Login extends Component {
         >
           login
         </button>
+        <br></br>
+        <div class="my-2">
+          Email{" "}
+          <input
+            type="email"
+            id="email"
+            class="rounded border-1 border-gray-300"
+          >
+          </input>   
+        </div>       
+        
+        <button class={buttonClass} onClick={async () => await request("http://localhost:4201/api/email?action=requestrecovery&email="+encodeURIComponent((document.getElementById("email") as HTMLInputElement).value), "Recovery requested! Check your email.")}>forgot password?</button>
       </>
     );
   }

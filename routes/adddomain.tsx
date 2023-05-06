@@ -4,6 +4,7 @@ import { checkLoginStatus } from "../src/lib.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { User } from "../src/database.ts";
 import AddDomain from "../islands/AddDomain.tsx";
+import { settings } from "../config/settings.ts";
 
 export const handler: Handlers<User> = {
   async GET(req, ctx) {
@@ -22,7 +23,7 @@ export default function adddomain({ data }: PageProps<User>) {
   return (
     <>
       <App user={data}>
-        <AddDomain></AddDomain>
+        <AddDomain nameservers={settings.nameservers}></AddDomain>
       </App>
     </>
   );

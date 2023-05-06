@@ -42,6 +42,7 @@ interface RawUser {
 interface Email {
   status: "verified"|"unverified"
   email: string;
+  verificationToken: string;
 }
 
 export class User {
@@ -112,6 +113,34 @@ export class User {
     return user;
   }
   
+  static findWithEmail(email: string) { // TODO: extremely inefficient
+    const raw = db.queryEntries<RawUser>("select * from users");
+    let user: User|undefined;
+
+    for(const z of raw) {
+      if((JSON.parse(z.email) as Email).email == email) {
+        user = new User(z.username);
+        break;
+      }
+    }
+
+    return user;
+  }
+
+    
+  static findWithVerificationToken(token: string) { // TODO: extremely inefficient
+    const raw = db.queryEntries<RawUser>("select * from users");
+    let user: User|undefined;
+
+    for(const z of raw) {
+      if((JSON.parse(z.email) as Email).verificationToken == token) {
+        user = new User(z.username);
+        break;
+      }
+    }
+
+    return user;
+  }
   static findId(id: string): User | undefined {
     const raw = User.findRawId(id);
     if (raw.length == 0) {

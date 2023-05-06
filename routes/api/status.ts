@@ -16,7 +16,7 @@ export const handler = async (
       const all = url.searchParams.get("all");
       if(all == "true") {
         const users: User[] = [];
-        User.getAllUsers().forEach(z => { // TODO: Extremely inefficient
+        User.getAllUsers().forEach(z => {
           users.push(User.findId(z.id)!);
         })
 
@@ -33,7 +33,10 @@ export const handler = async (
     }
     return jsonResponse({
       id: user.id,
-      email: user.email,
+      email: {
+        email: user.email.email,
+        status: user.email.status
+      },
       domains: user.domains
     })
 };

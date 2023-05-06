@@ -1,1 +1,0 @@
-export default "set a password hash . make it Good. No 'helloworld' bullshit";

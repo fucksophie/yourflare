@@ -1,19 +1,18 @@
 # yourflare
-## Version: 4
-
+## Version: 5
 
 ### Talking points:
 1. Opensource DNS managment
 2. Supports cookie-based sessions with HTTPonly
 3. Written in Preact/Tailwind using Fresh
 4. Extremely quick setup,  
-4.1 Move `config/example.passwordHash.ts` to `config/passwordHash.ts`  
-4.2 Move `config/example.settings.ts` to `config/settings.ts`  
-4.3 Edit the renamed files  
-4.4 Run `deno task start`.
+4.1 Move `config/example.settings.ts` to `config/settings.ts`  
+4.2 Edit the renamed settings file  
+4.3 Run `deno task start`.
 5. Full integration with Coredns through src/coredns.ts
 6. Automatic DNS Zonefile creation and managment
 7. Full DNSSEC/DS record authenication
+8. Account recovery via Email & password changing
 
 ### How do I gain admin status?
 1. Run the app for the first time
@@ -24,11 +23,11 @@
 6. Run `sqlite3 yourflare.db` and run `UPDATE users SET admin = TRUE WHERE id = 'THEIDYOUCOPIED'`
 7. Start it back up!
 
-### Migrate from v3 to v4
-Version 4 turns the `email` field from a basic-text field to `{}`.
+### Migrate from v4 to v5
+Version 5 moves the passwordHash.ts file to  
+settings.ts -> { passwordHash: string }.
 
-This migration is VERY easy, single SQL query:
-`UPDATE users SET email = '{}';`
+Version 5 also adds email sending and password recovery and more. This requires you to setup a SMTP server in your config. Check the example settings.
 
 ### Requirements
 Yourflare requires the `dnssec-keygen` and the `dnssec-dsfromkey` utilities. Install them via `sudo apt-get install bind9utils`

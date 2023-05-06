@@ -5,7 +5,7 @@ import { z } from "zod";
 import * as Cookies from "cookies";
 import SessionHandler from "./sessions.ts";
 import { User } from "./database.ts";
-import passwordHash from "../config/passwordHash.ts";
+import { settings } from "../config/settings.ts";
 
 export const exists = async (filename: string): Promise<boolean> => {
   try {
@@ -68,7 +68,7 @@ export function hashPassword(password: string): string {
   return bufferToHex(
     hash(
       new TextEncoder().encode(password),
-      new TextEncoder().encode(passwordHash),
+      new TextEncoder().encode(settings.passwordHash),
       {
         variant: variant.argon2id,
       },

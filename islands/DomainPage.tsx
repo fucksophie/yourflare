@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Attributes, Component, ComponentChild, JSX, render } from "preact";
-import { buttonClass, Hr } from  "../src/misc.tsx";
+import { buttonClass, Hr, request } from  "../src/misc.tsx";
 import Toastify from 'https://esm.sh/toastify-js@1.12.0'
 import { ToastDefault } from "./Login.tsx";
 import { DNSRecord, recordDefinitions, supportedRecords } from "../src/domains.ts";
@@ -19,7 +19,7 @@ export function Th(props: JSX.HTMLAttributes<HTMLTableSectionElement>) {
 }
 
 export function Tr(props: JSX.HTMLAttributes<HTMLTableSectionElement>) {
-  const elem = <tr class="hover:bg-slate-200 rounded max-h-min overflow-scroll px-1">{props.children}</tr>;
+  const elem = <tr class="hover:bg-slate-200 rounded max-h-min max-w-min overflow-scroll px-1">{props.children}</tr>;
   Object.entries(props).forEach((v) => {
     if(v[0] == "children") return;
     elem.props[v[0]] = v[1];
@@ -42,15 +42,10 @@ export default class DomainPage extends Component {
 
   async changeTtl() {
     const input = +(document.getElementById("ttl") as HTMLInputElement).value;
-    const request = await fetch("/api/ttl?id="+this.props.domain.id+"&ttl="+input);
+    const request = await fetch("/api/ttl?id="+this.props.domain.id+"&ttl="+(+(document.getElementById("ttl") as HTMLInputElement).value));
     const json = await request.json();
     
-    if(!request.ok) {
-      Toastify({
-        ...ToastDefault,
-        text: "TTL: " + json.error,
-      }).showToast();
-    }
+
   }
 
   async addRecord() {
@@ -130,24 +125,11 @@ export default class DomainPage extends Component {
       text: "Are you sure that you want to delete this domain? (click!)",
       onClick: async () => {
         toast.hideToast();
-        const request = await fetch("/api/deletedomain?id="+this.props.domain.id)
-        const json = await request.json();
-
-        if(request.ok) {
-          Toastify({
-            ...ToastDefault,
-            text: "Domain deleted."
-          }).showToast();
-
+        await request("/api/deletedomain?id="+this.props.domain.id, "Domain deleted.", () => {
           setTimeout(()=>{
             location.href = "/dash"
           }, 1000)
-        } else {
-          Toastify({
-            ...ToastDefault,
-            text: json.error,
-          }).showToast();
-        }
+        })
       }
     });
     toast.showToast();
@@ -218,7 +200,7 @@ export default class DomainPage extends Component {
         })()}
 
         <div>
-          TTL: <input type="number" onInput={async () => await this.changeTtl()} id="ttl" value={this.props.domain.ttl}></input>
+          TTL: <input type="number" onInput={async () => await request("/api/ttl?id="+this.props.domain.id+"&ttl="+(+(document.getElementById("ttl") as HTMLInputElement).value), "TTL changed.", () => {}, false)} id="ttl" value={this.props.domain.ttl}></input>
         </div>
         <Hr></Hr>
         <button class={buttonClass} onClick={async () => await this.deleteDomain()}>Delete domain</button>

@@ -1,11 +1,20 @@
-import { ComponentChild } from "https://esm.sh/v117/preact@10.11.0/src/index.js";
 import { buttonClass } from  "../src/misc.tsx";
-import { Component } from "preact";
+import { Component, Attributes, ComponentChild } from "preact";
 import Toastify from 'https://esm.sh/toastify-js@1.12.0'
 import { ToastDefault } from "./Login.tsx";
-import { settings } from "../config/settings.ts";
+
+interface AddDomainAttributes extends Attributes {
+  nameservers: {"name": string,"ip": string}[]
+}
 
 export default class AddDomain extends Component {
+  props: AddDomainAttributes;
+
+  constructor(props: AddDomainAttributes) {
+    super(props);
+    this.props = props;
+  }
+
   async addDomain(zone: string) {
     const request = await fetch(`/api/adddomain?zone=${encodeURIComponent(zone)}`, {
       credentials: "same-origin"
@@ -66,7 +75,7 @@ export default class AddDomain extends Component {
         
         <p class="w-1/2">
           Make sure to have set up the nameservers on your domain to point to
-          <strong> {settings.nameservers[0].name}</strong> and <strong>{settings.nameservers[1].name}</strong>! If you have not, this process will not go smoothly and might
+          <strong> {this.props.nameservers[0].name}</strong> and <strong>{this.props.nameservers[1].name}</strong>! If you have not, this process will not go smoothly and might
           take a long time. 
           <br></br>Please check your current nameservers on your DNS resolver through:
           <br></br>Windows: nslookup -q=ns example.com

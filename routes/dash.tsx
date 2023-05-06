@@ -21,7 +21,7 @@ export default function dash({ data }: PageProps<User>) {
   return (
     <>
       <App user={data}>
-        <Dashboard admin={data.admin}></Dashboard>
+        <Dashboard user={data}></Dashboard>
       </App>
     </>
   );
