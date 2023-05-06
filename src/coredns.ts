@@ -81,13 +81,14 @@ class Coredns {
   }
 
   async deleteDomain(domain: Domain) {
-    await this.generateCorefile();
-
-    Deno.removeSync("coredns/zones/db."+domain.zone); 
+    await Deno.remove("coredns/zones/db."+domain.zone); 
     const dnssec = this.listCerts();
-
-    Deno.removeSync(`coredns/dnssec/${dnssec[domain.zone]}.key`)
-    Deno.removeSync(`coredns/dnssec/${dnssec[domain.zone]}.private`)
+    if(dnssec[domain.zone]) {
+      await Deno.remove(`coredns/dnssec/${dnssec[domain.zone]}.key`)
+      await Deno.remove(`coredns/dnssec/${dnssec[domain.zone]}.private`)
+    }
+    
+    await this.generateCorefile();
   }
 
   private async generateCorefile() {
@@ -144,13 +145,10 @@ version.bind version.server authors.bind {
   private listCerts() {
     const domainsToDNSSec:Record<string, string> = {};
 
-    Domain.getAllDomains().forEach(d => {
-      for(const z of Deno.readDirSync("coredns/dnssec")) {
-        if(z.name.startsWith("K"+d.zone+".")) {
-          domainsToDNSSec[d.zone] = z.name.split(".").slice(0, -1).join(".");
-        }
-      }
-    })
+    for(const z of Deno.readDirSync("coredns/dnssec")) {
+      domainsToDNSSec[z.name.split(".+")[0].substring(1)] = z.name.split(".").slice(0, -1).join(".")
+    }
+
     return domainsToDNSSec;
   }
   

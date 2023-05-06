@@ -29,8 +29,8 @@ export const handler = async (
     return jsonResponse({error: "You do not have permission to access this domain"}, 400);
   }
   const domain = Domain.findId(id)!;
-  await coredns.deleteDomain(domain);
   domain.delete();
+  await coredns.deleteDomain(domain);
   
   domain.findAllUsers().forEach(z => {
     const zzzz = User.findId(z)!;

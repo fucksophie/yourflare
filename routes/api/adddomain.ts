@@ -17,7 +17,7 @@ export const handler = async (
   const user = loginStatus[1]!;
 
   const url = new URL(_req.url);
-  let zone = url.searchParams.get("zone")!;
+  let zone = (url.searchParams.get("zone")||"").toLowerCase();
 
   if(zone && !user.admin) {
     const parts = zone.split(".").filter(Boolean);
@@ -82,8 +82,8 @@ export const handler = async (
 
     const deleteInterval = setTimeout(async ()=>{
       clearInterval(original);
-      await coredns.deleteDomain(domain);
       domain.delete();
+      await coredns.deleteDomain(domain);
       if(User.findRawId(user.id).length != 0) { // Check if user's real
         const newUser = User.findId(user.id)!; // An long time has passed. Most likely this user's information has been changed.
         newUser.domains = newUser.domains.filter(z => z != domain.id);

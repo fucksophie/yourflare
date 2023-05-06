@@ -39,7 +39,7 @@ const recordRegex = new RegExp("^("+supportedRecords.join("|")+")$")
 export const TTL = z.number().max(86400).min(1);
 export const RecordType = z.string().regex(recordRegex, "Is not a part of the supported records: " + supportedRecords.join(", "));
 export const DomainID = z.string().uuid();
-export const Zone = z.string().max(63+4).min(4);
+export const Zone = z.string().toLowerCase().max(63+4).min(4);
 
 export const recordDefinitions: Record<string, string[]> = {};
 

@@ -27,8 +27,8 @@ export const handler = async (
   for await(const z of user.domains) {
     const domain = Domain.findId(z)!;
     if(domain.findAllUsers().length == 1) {
-      await coredns.deleteDomain(domain);
       domain.delete();
+      await coredns.deleteDomain(domain);
     }
   }
 
