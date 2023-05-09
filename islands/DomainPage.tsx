@@ -19,7 +19,7 @@ export function Th(props: JSX.HTMLAttributes<HTMLTableSectionElement>) {
 }
 
 export function Tr(props: JSX.HTMLAttributes<HTMLTableSectionElement>) {
-  const elem = <tr class="hover:bg-slate-200 rounded max-h-min max-w-min overflow-scroll px-1">{props.children}</tr>;
+  const elem = <tr class="hover:bg-slate-200 rounded max-h-min max-w-max overflow-scroll px-1">{props.children}</tr>;
   Object.entries(props).forEach((v) => {
     if(v[0] == "children") return;
     elem.props[v[0]] = v[1];
