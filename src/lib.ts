@@ -4,7 +4,7 @@ import { hash, variant } from "argon";
 import { z } from "zod";
 import * as Cookies from "cookies";
 import SessionHandler from "./sessions.ts";
-import { User } from "./database.ts";
+import { Domain, User } from "./database.ts";
 import { settings } from "../config/settings.ts";
 
 export const exists = async (filename: string): Promise<boolean> => {
@@ -31,7 +31,12 @@ if(!await exists('static/tlds.json')) {
   const text = Deno.readTextFileSync("static/tlds.json");
   tlds = JSON.parse(text);
 }
-
+Domain.getAllDomains().forEach(z => {
+  if(z.zone.split(".").length==1) {
+    tlds.push(z.zone);
+    console.log("[DNS] Custom TLD was found to be registered:", z.zone)
+  }
+})
 export function isValidTLD(zone: string) {
   return tlds.includes(zone.split(".").at(-1)!);
 }
