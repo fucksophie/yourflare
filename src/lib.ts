@@ -31,16 +31,20 @@ if(!await exists('static/tlds.json')) {
   const text = Deno.readTextFileSync("static/tlds.json");
   tlds = JSON.parse(text);
 }
-Domain.getAllDomains().forEach(z => {
-  if(z.zone.split(".").length==1) {
-    tlds.push(z.zone);
-    console.log("[DNS] Custom TLD was found to be registered:", z.zone)
-  }
-})
+
 export function isValidTLD(zone: string) {
   return tlds.includes(zone.split(".").at(-1)!);
 }
 
+export function registerTLD(tld: string) {
+  console.log("[DNS-MGN] A new Custom-TLD was registered:", tld)
+  tlds.push(tld);
+}
+
+export function deleteTLD(tld: string) {
+  console.log("[DNS-MGN] A Custom-TLD was deleted:", tld)
+  tlds = tlds.filter(z => z !== tld)
+}
 function bufferToHex(buffer: Uint8Array) {
   return [...new Uint8Array(buffer)]
     .map((b) => b.toString(16).padStart(2, "0"))

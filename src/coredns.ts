@@ -1,5 +1,5 @@
 import { tgz } from "https://deno.land/x/compress@v0.4.4/mod.ts";
-import { exists } from "./lib.ts";
+import { deleteTLD, exists, registerTLD } from "./lib.ts";
 import { readLines } from "https://deno.land/std@0.129.0/io/buffer.ts";
 import { settings } from "../config/settings.ts";
 import { Domain } from "./database.ts";
@@ -76,6 +76,9 @@ class Coredns {
   }
 
   async createDomain(domain: Domain) {
+    if(domain.zone.split(".").length == 1) {
+      registerTLD(domain.zone);
+    }
     Deno.writeTextFileSync("coredns/zones/db."+domain.zone, await this.generateZonefile(domain))
     await this.generateCorefile();
   }
@@ -88,6 +91,9 @@ class Coredns {
       await Deno.remove(`coredns/dnssec/${dnssec[domain.zone]}.private`)
     }
     
+    if(domain.zone.split(".").length == 1) {
+      deleteTLD(domain.zone);
+    }
     await this.generateCorefile();
   }
 
